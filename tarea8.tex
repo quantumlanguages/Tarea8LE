@@ -1,0 +1,171 @@
+% tipo
+\documentclass{article}
+
+% formato
+\usepackage[letterpaper, margin = 1.5cm]{geometry}
+\usepackage{float}
+
+% matematicas
+\usepackage{amsmath}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{ebproof}
+% encabezado
+
+\title{
+    Lenguajes de Programación 2020-1\\
+    Facultad de Ciencias UNAM\\
+    Ejercicio Semanal 8
+}
+
+\author{
+    Sandra del Mar Soto Corderi\\
+    Edgar Quiroz Castañeda
+}
+
+\date{
+    10 de octubre del 2019
+}
+
+\begin{document}
+    \maketitle
+
+    \begin{enumerate}
+        \item {
+		   Encontrar el tipo mas general para las siguientes expresiones de 
+		   Cálculo Lambda utilizando el algoritmo de inferencia de tipos W.
+        	
+        	\begin{enumerate}
+        		\item {
+				 $\texttt{and} = \lambda x\lambda y.xy\texttt{true} = 
+				 \lambda x\lambda y.xy (\lambda x\lambda y.x) 
+				 =_{\alpha} \lambda x\lambda y.xy (\lambda a\lambda b.a)$
+        		 
+        		 Como Var($\texttt{and}$) = $\{x$: X, $y$: Y, $a$: A, $b$: B$\}$
+        		 \begin{align}        		 
+        		 &\varnothing | \Gamma \models x : X &\mathrm{(Var)}\\
+        		 &\varnothing | \Gamma \models y : Y &\mathrm{(Var)}\\
+        		 &= 0 &\mathrm{(Definicion \ Integral)}
+        		 \end{align}
+        		}
+        		\item {
+					$\texttt{or} = \lambda x \lambda y.x \texttt{true} y$
+					 
+					Primero
+					\begin{figure}[H]
+						\centering
+						\begin{prooftree}
+
+							\hypo{x:X \in \Gamma_1 = \{x:X\}}
+							\infer 1 [Var] {
+								\varnothing | \Gamma_1 \vdash x:X
+							}
+
+							\infer 0 [Ax] {
+								\varnothing | \varnothing
+								\vdash \texttt{true}:Bool
+							}
+
+							\hypo{S = \varnothing}
+
+							\infer [no rule] 1 {Z_1 \texttt{ fresh}}
+
+							\infer [no rule] 1 {
+								(\varnothing \cup \{X\})
+								\cap
+								(\varnothing \cup \varnothing)
+								= \varnothing
+							}
+
+							\infer 3 [App] {
+								R_1 = \{X = \texttt{Bool} \mapsto Z_1\} 
+								| \Gamma_1
+								\vdash x \texttt{true} : Z_1
+							}
+						\end{prooftree}
+						\label{A}
+					\end{figure}
+
+					Luego
+					\begin{figure}[H]
+						\centering
+						\begin{prooftree}
+							\hypo{Anterior}
+							\infer 1 [App] {
+								R_1 | \Gamma_1 \vdash x \texttt{true} : Z_1
+							}
+
+							\hypo{y:Y \in \Gamma_2 = \{y:y\}}
+							\infer 1 [Var] {
+								\varnothing | \Gamma_2 \vdash y:Y
+							}
+
+							\hypo{S = \{X = \texttt{Bool} \mapsto Z_1\}}
+
+							\infer [no rule] 1 {Z_2 \texttt{ fresh}}
+
+							\infer [no rule] 1 {
+								(\{X, Z_1\} \cup \{X\})
+								\cap
+								(\varnothing \cup \varnothing)
+								= \varnothing
+							}
+
+							\infer 3 [App] {
+								R_2 = \{Z_1 = Y \mapsto Z_2\} \cup R_1
+								| \Gamma_3 = \Gamma_1 \cup \Gamma_2 \vdash x \texttt{true} y : Z_2
+							}
+
+							\infer 1 [App] {
+								R_2
+								| \Gamma_3 \vdash x \texttt{true} y : Z_2
+							}
+
+							\infer 1 [Lam] {
+								R_2
+								| \Gamma_4 = \Gamma_3 \backslash \{y : Y\} 
+								\vdash \lambda y . x \texttt{true} y : Y \mapsto Z_2
+							}
+
+							\infer 1 [Lam] {
+								R_2
+								| \varnothing = \Gamma_4 \backslash \{x : X\} 
+								\vdash \lambda x. \lambda y . 
+								x \texttt{true} y : X \mapsto (Y \mapsto Z_2)
+							}
+						\end{prooftree}
+						\label{B}
+					\end{figure}
+
+					Con $R_2 = \{X = \texttt{Bool} \mapsto Z_1, 
+					Z_1 = Y \mapsto Z_2\}$.
+
+					Unificando tenemos que $\{X = Bool \mapsto (Y \mapsto Z_2)\}$.
+
+					Por lo que la expresión tiene tipo
+
+					\[
+						\lambda x. \lambda y . 
+						x \texttt{true} y : (Bool \mapsto (Y \mapsto Z_2)) 
+						\mapsto (Y \mapsto Z_2)
+					\]
+
+
+					
+
+        		}
+        		\item {
+        			$\texttt{snd} = \lambda p.p  \texttt{false} 
+        			 = \lambda p.p (\lambda x\lambda y.y) $
+        			Como Var($\texttt{and}$) = $\{x$: X, $y$: Y, $p$: P$\}$
+        			\begin{align}       		 
+        			&\varnothing | \{x: X, y: Y\} \models x : X &\mathrm{(Var)}\\
+        			&\varnothing | \{x: X, y: Y\} \models x : X &\mathrm{(Var)}\\
+        			&= 0 &\mathrm{(Definicion \ Integral)}
+        			\end{align}
+				}
+			\end{enumerate}
+        }
+    \end{enumerate}
+\end{document}
