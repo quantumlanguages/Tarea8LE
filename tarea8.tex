@@ -4,6 +4,7 @@
 % formato
 \usepackage[letterpaper, margin = 1.5cm]{geometry}
 \usepackage{float}
+\usepackage{nameref}
 
 % matematicas
 \usepackage{amsmath}
@@ -35,6 +36,65 @@
         \item {
 		   Encontrar el tipo mas general para las siguientes expresiones de 
 		   Cálculo Lambda utilizando el algoritmo de inferencia de tipos W.
+
+		   Como todos los ejercicios incluyen las funciones \texttt{true} y 
+		   \texttt{false}, para ahorar algunos pasos se podrían derivar los 
+		   tipos de estas con antelación.
+
+		   \begin{figure}[H]
+			   \centering
+			   \begin{prooftree}
+				   \hypo{
+					   \Gamma_1 = \{a:A, b:B\} \vdash a:A
+				   }
+
+				   \infer 1 [Var] {
+					   \varnothing | \Gamma_1 \vdash a:A
+				   }
+				   \infer 1 [Lam] {
+					   \varnothing | \Gamma_2 = \{a:A\}
+					   \vdash \lambda b . a : B \mapsto A
+				   }
+
+				   \infer 1 [Lam] {
+					   \varnothing | \varnothing
+					   \vdash \lambda a . \lambda b . a : A \mapsto (B \mapsto A)
+				   }
+			   \end{prooftree}
+			   \caption{Tipo de \texttt{true}}
+			   \label{fig:t_true}
+		   \end{figure}
+
+		   Y como se llegó a este tipo sin restricciones, entonces ese el tipo
+		   de la expresión.
+
+		   \begin{figure}[H]
+			\centering
+			\begin{prooftree}
+				\hypo{
+					\Gamma_1 = \{a:A, b:B\} \vdash a:A
+				}
+
+				\infer 1 [Var] {
+					\varnothing | \Gamma_1 \vdash a:A
+				}
+				\infer 1 [Lam] {
+					\varnothing | \Gamma_2 = \{a:A\}
+					\vdash \lambda a . a : A \mapsto A
+				}
+
+				\infer 1 [Lam] {
+					\varnothing | \varnothing
+					\vdash \lambda b . \lambda a . a : B \mapsto (A \mapsto A)
+				}
+			\end{prooftree}
+			\caption{Tipo de \texttt{false}}
+			\label{fig:t_false}
+		\end{figure}
+
+		Y como se llegó a este tipo sin restricciones, entonces ese el tipo
+		de la expresión.s
+
         	
         	\begin{enumerate}
         		\item {
@@ -84,9 +144,12 @@
 							 R | \Gamma_3 \vdash x y : Z_1
 						 }
 
-						 \infer 0 [Ax] {
+						 \hypo{
+							 \text{\nameref{fig:t_true}}
+						 }
+						 \infer 1 [Lam] {
 							 \varnothing | \varnothing
-							 \vdash \texttt{true}:Bool
+							 \vdash \texttt{true}:A \mapsto (B \mapsto A)
 						 }
 
 						 \hypo{S = \varnothing}
@@ -101,7 +164,7 @@
 						 }
 
 						 \infer 3 [App] {
-							R_2 = \{Z_1 = Bool \mapsto Z_2\}\cup R
+							R_2 = \{Z_1 = (A \mapsto (B \mapsto A)) \mapsto Z_2\}\cup R
 							| \Gamma_3 \vdash x y \texttt{true} : Z_2
 						 }
 
@@ -121,14 +184,16 @@
 					 \label{D}
 				 \end{figure}
 
-				 Con $R_2 = \{X = Y \mapsto Z_1, Z_1 = Bool \mapsto Z_2\}$, que
-				 unificado es $\{X = Y \mapsto (Bool \mapsto Z_2)\}$
+				 Con $R_2 = \{X = Y \mapsto Z_1, Z_1 = (A \mapsto (B \mapsto A))
+				  \mapsto Z_2\}$, que
+				 unificado es $\{X = Y \mapsto ((A \mapsto (B \mapsto A)) \mapsto Z_2)\}$
 
 				 Por lo que la expresión tiene tipo
 
 				 \[
 					 \lambda x. \lambda y . 
-					 x y \texttt{true} : (Y \mapsto (Bool \mapsto Z_2)) \mapsto (Y \mapsto Z_2)
+					 x y \texttt{true} : (Y \mapsto ((A \mapsto (B \mapsto A)) 
+					 \mapsto Z_2)) \mapsto (Y \mapsto Z_2)
 				 \]
         		}
         		\item {
@@ -144,9 +209,13 @@
 								\varnothing | \Gamma_1 \vdash x:X
 							}
 
-							\infer 0 [Ax] {
+							\hypo {
+								\text{\nameref{fig:t_true}}
+							}
+
+							\infer 1 [Lam] {
 								\varnothing | \varnothing
-								\vdash \texttt{true}:Bool
+								\vdash \texttt{true}:A \mapsto (B \mapsto A)
 							}
 
 							\hypo{S = \varnothing}
@@ -161,7 +230,7 @@
 							}
 
 							\infer 3 [App] {
-								R_1 = \{X = \texttt{Bool} \mapsto Z_1\} 
+								R_1 = \{X = (A \mapsto (B \mapsto A)) \mapsto Z_1\} 
 								| \Gamma_1
 								\vdash x \texttt{true} : Z_1
 							}
@@ -183,7 +252,7 @@
 								\varnothing | \Gamma_2 \vdash y:Y
 							}
 
-							\hypo{S = \{X = \texttt{Bool} \mapsto Z_1\}}
+							\hypo{S = \varnothing}
 
 							\infer [no rule] 1 {Z_2 \texttt{ fresh}}
 
@@ -220,22 +289,24 @@
 						\label{B}
 					\end{figure}
 
-					Con $R_2 = \{X = \texttt{Bool} \mapsto Z_1, 
+					Con $R_2 = \{X = (A \mapsto (B \mapsto A)) \mapsto Z_1, 
 					Z_1 = Y \mapsto Z_2\}$.
 
-					Unificando tenemos que $\{X = Bool \mapsto (Y \mapsto Z_2)\}$.
+					Unificando tenemos que $\{X = (A \mapsto (B \mapsto A)) 
+					\mapsto (Y \mapsto Z_2)\}$.
 
 					Por lo que la expresión tiene tipo
 
 					\[
 						\lambda x. \lambda y . 
-						x \texttt{true} y : (Bool \mapsto (Y \mapsto Z_2)) 
+						x \texttt{true} y : ((A \mapsto (B \mapsto A)) 
+						\mapsto (Y \mapsto Z_2))
 						\mapsto (Y \mapsto Z_2)
 					\]
 
         		}
         		\item {
-					$\texttt{snd} = \lambda p.p  \texttt{false}$
+					$\texttt{not} = \lambda p.p  \texttt{false}$
 					
 					\begin{figure}[H]
 						\centering
@@ -247,9 +318,13 @@
 								\varnothing | \Gamma \vdash p : P
 							}
 
-							\infer 0 [Ax] {
+							\hypo {
+								\text{\nameref{fig:t_false}}
+							}
+
+							\infer 1 [Lam] {
 								\varnothing | \varnothing 
-								\vdash \texttt{false} : Bool
+								\vdash \texttt{false} : B \mapsto (A \mapsto A)
 							}
 
 							\hypo{S = \varnothing}
@@ -264,7 +339,7 @@
 							}
 
 							\infer 3 [App] {
-								R = \{P = Bool \mapsto Z\} | \Gamma 
+								R = \{P = (B \mapsto (A \mapsto A)) \mapsto Z\} | \Gamma 
 								\vdash p \texttt{false} : Z
 							}
 
@@ -276,11 +351,12 @@
 						\label{C}
 					\end{figure}
 
-					Y como $R = \{P = Bool \mapsto Z\}$ ya está unificado, 
-					entonces el tipo de la expresión es
+					Y como $R = \{P = (B \mapsto (A \mapsto A)) \mapsto Z\}$ 
+					ya está unificado, entonces el tipo de la expresión es
 
 					\[
-						\lambda p. p \texttt{false} : (Bool \mapsto Z) \mapsto Z
+						\lambda p. p \texttt{false} : ((B \mapsto (A \mapsto A))
+						 \mapsto Z) \mapsto Z
 					\]
 
 				}
